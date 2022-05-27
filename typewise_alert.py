@@ -41,12 +41,12 @@ def classify_temperature_breach(cooling_type, temperature_in_c):
     return infer_breach(temperature_in_c, lower_limit, upper_limit)
 
 
-def monitor_battery_temp(alert_target, battery_char, temperature_in_c):
+def monitor_battery_temp(alert_target, battery_char, temperature_in_c, alert_creators):
     breach_type = classify_temperature_breach(battery_char['coolingType'], temperature_in_c)
     if alert_target == 'TO_CONTROLLER':
-        recipient, msg = create_alert_for_controller(breach_type)
+        recipient, msg = (alert_creators.get('controller_alerter'))(breach_type)
     elif alert_target == 'TO_EMAIL':
-        recipient, msg = create_alert_for_email(breach_type)
+        recipient, msg = (alert_creators.get('email_alerter'))(breach_type)
     return send_alert(recipient, msg)
 
 

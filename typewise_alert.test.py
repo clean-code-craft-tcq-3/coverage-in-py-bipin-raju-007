@@ -45,8 +45,19 @@ class TypewiseTest(unittest.TestCase):
         self.assertFalse(typewise_alert.send_alert("recipient", ""))
 
     def test_monitor_battery_temp(self):
-        self.assertFalse(typewise_alert.monitor_battery_temp('TO_EMAIL', {'coolingType': "PASSIVE_COOLING"}, 20))
-        self.assertTrue(typewise_alert.monitor_battery_temp('TO_CONTROLLER', {'coolingType': "HI_ACTIVE_COOLING"}, 60))
+        def stub_create_alert_for_controller(breach_type):
+            return "0xfeed", breach_type
+
+        def stub_create_alert_for_email(breach_type):
+            breach_type = "" if breach_type == "NORMAL" else breach_type
+            return "a.b@c.com", breach_type
+
+        stub_alerter_list = {'controller_alerter': stub_create_alert_for_controller,
+                             'email_alerter': stub_create_alert_for_email}
+        self.assertFalse(typewise_alert.monitor_battery_temp('TO_EMAIL', {'coolingType': "PASSIVE_COOLING"},
+                                                             20, stub_alerter_list))
+        self.assertTrue(typewise_alert.monitor_battery_temp('TO_CONTROLLER', {'coolingType': "HI_ACTIVE_COOLING"},
+                                                            60, stub_alerter_list))
 
 
 if __name__ == '__main__':
